@@ -1178,11 +1178,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   assetSavePath: Assets/PaperObjs/MeshAndMat
-  scaleOffSetRatio: 100
   defaultMaterial: {fileID: 2100000, guid: d082332dcff3e3d4a94aa1ec7fdc2ceb, type: 2}
   planeTexture: {fileID: 0}
-  cubeTexture: {fileID: 2800000, guid: b3425210e75303d4f8205728b47933d0, type: 3}
-  cubeScale: {x: 5, y: 6.5, z: 2.5}
+  scaleOffset_Plane: 100
+  cubeTexture: {fileID: 2800000, guid: c1f0c9a0f1ceed1459c15eeb67d67dcd, type: 3}
+  scaleOffset_Cube: 100
+  cubeScale: {x: 5, y: 8, z: 3}
 --- !u!4 &581525948
 Transform:
   m_ObjectHideFlags: 0
