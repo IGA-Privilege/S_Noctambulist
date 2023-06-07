@@ -88,17 +88,22 @@ public class PaperArtGenerator : MonoBehaviour
         cubeMesh.uv = uv;
         cubeMesh.triangles = triangles;
         cubeMesh.normals = normals;
-
-        foreach (var no in cubeMesh.normals)
-        {
-            Debug.Log("Normal: " + no);
-        }
         cubeMesh.RecalculateBounds();
 
         string gameObjectName = cubeTexture.name;
         GameObject newCube = new GameObject(gameObjectName, typeof(MeshFilter), typeof(MeshRenderer));
         newCube.GetComponent<MeshFilter>().mesh = cubeMesh;
-        newCube.GetComponent<MeshRenderer>().material = InitNewMaterial(cubeTexture);
+        Material material = InitNewMaterial(cubeTexture);
+        newCube.GetComponent<MeshRenderer>().material = material;
+
+        string meshName = cubeTexture.name + ".asset";
+        string materialName = cubeTexture.name + ".mat";
+        // 保存Mesh到资源库
+        AssetDatabase.CreateAsset(cubeMesh, $"{assetSavePath}/{meshName}");
+        AssetDatabase.SaveAssets();
+        // 保存Material到资源库
+        AssetDatabase.CreateAsset(material, $"{assetSavePath}/{materialName}");
+        AssetDatabase.SaveAssets();
 
         Vector3[] GenerateVertices()
         {
