@@ -7,7 +7,8 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class PaperArtGenerator : MonoBehaviour
 {
-    public string assetSavePath = "Assets/PaperObjs/MeshAndMat";
+    public string assetSavePath_Quad = "Assets/PaperObjs/MeshAndMat/Quads";
+    public string assetSavePath_Cube = "Assets/PaperObjs/MeshAndMat/Cubes";
     public Material defaultMaterial; // 共享的材质
 
     [Header("Quad Generator")]
@@ -58,10 +59,10 @@ public class PaperArtGenerator : MonoBehaviour
         string meshName = planeTexture.name + ".asset";
         string materialName = planeTexture.name + ".mat";
         // 保存Mesh到资源库
-        AssetDatabase.CreateAsset(mesh, $"{assetSavePath}/{meshName}");
+        AssetDatabase.CreateAsset(mesh, $"{assetSavePath_Quad}/{meshName}");
         AssetDatabase.SaveAssets();
         // 保存Material到资源库
-        AssetDatabase.CreateAsset(material, $"{assetSavePath}/{materialName}");
+        AssetDatabase.CreateAsset(material, $"{assetSavePath_Quad}/{materialName}");
         AssetDatabase.SaveAssets();
     }
 
@@ -99,10 +100,10 @@ public class PaperArtGenerator : MonoBehaviour
         string meshName = cubeTexture.name + ".asset";
         string materialName = cubeTexture.name + ".mat";
         // 保存Mesh到资源库
-        AssetDatabase.CreateAsset(cubeMesh, $"{assetSavePath}/{meshName}");
+        AssetDatabase.CreateAsset(cubeMesh, $"{assetSavePath_Cube}/{meshName}");
         AssetDatabase.SaveAssets();
         // 保存Material到资源库
-        AssetDatabase.CreateAsset(material, $"{assetSavePath}/{materialName}");
+        AssetDatabase.CreateAsset(material, $"{assetSavePath_Cube}/{materialName}");
         AssetDatabase.SaveAssets();
 
         Vector3[] GenerateVertices()
