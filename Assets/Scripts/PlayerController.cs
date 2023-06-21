@@ -4,63 +4,188 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private Camera playerCamera;
-    [SerializeField] private SpriteRenderer playerSprite;
     [SerializeField] private Transform eyePoint;
     [SerializeField] private CharacterController characterController;
     [SerializeField] private GameObject debuggingVisualSphere;
-    [SerializeField] private Animator animator;
+    [SerializeField] private MeshRenderer playerMeshRenderer;
+    [SerializeField] private Material playerFrontIdleMat;
+    [SerializeField] private Material playerBackIdleMat;
+    [SerializeField] private Material playerLeftIdleMat;
+    [SerializeField] private Material playerRightIdleMat;
+    [SerializeField] private MeshRenderer catMeshRenderer;
+    [SerializeField] private Material catFrontIdleMat;
+    [SerializeField] private Material catBackIdleMat;
+    [SerializeField] private Material catLeftIdleMat;
+    [SerializeField] private Material catRightIdleMat;
+    [SerializeField] private Transform playerShadow;
+    [SerializeField] private Transform catManifest;
+    [SerializeField] private Image viewSwitchingCurtain;
 
+    private Vector3 playerManifestPos;
+    private Vector3 playerManifestRotation;
+    private Vector3 catShadowPos;
+    private Vector3 catShadowRotation;
+    private bool isCatView = false;
+    private bool isLookingBehind = false;
+    private float switchViewSecCounter = 0f;
     private float lookRotationX = 0;
     private float lookRotationY = 0;
     private float lookSpeed = 2f;
     private float lookXLimit = 45f;
-    private bool canMove;
     private float walkSpeed = 2f;
     private Vector3 moveDirection = Vector3.zero;
     float maxInteractDistance = 2.5f;
 
     private void Awake()
     {
-        canMove = true;
+        MarkOriginalPosition();
         SetMouseLocked();
+    }
+
+    private void MarkOriginalPosition()
+    {
+        playerManifestPos = playerMeshRenderer.transform.localPosition;
+        playerManifestRotation = playerMeshRenderer.transform.localEulerAngles;
+        catShadowPos = catMeshRenderer.transform.localPosition;
+        catShadowRotation = catMeshRenderer.transform.localEulerAngles;
     }
 
     private static void SetMouseLocked()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+        UnityEngine.Cursor.visible = false;
     }
 
     private void Update()
     {
-        if (canMove)
+        KeepEyesTrackingMouse();
+        AlignCameraToEyes();
+        HighlightLookPos();
+        HandleMovement();
+        DetectSwitchView();
+        FacePlayerToCamera();
+
+        if (Input.GetMouseButtonUp(0))
         {
-            KeepEyesTrackingMouse();
-            AlignCameraToEyes();
-            HighlightLookPos();
-            HandleMovement();
-            if (Input.GetMouseButtonUp(0))
-            {
-                TryInteractWithObj();
-            }
+            TryInteractWithObj();
         }
-        FaceSpriteToCamera();
     }
 
 
 
     private void HandleMovement()
     {
-        Vector3 forward = transform.TransformDirection(new Vector3(eyePoint.forward.x, 0, eyePoint.forward.z).normalized);
+        Vector3 forward = new Vector3(eyePoint.forward.x, 0, eyePoint.forward.z).normalized;
         float curSpeedX = walkSpeed * Input.GetAxis("Vertical");
-        moveDirection = forward * curSpeedX;
+        Vector3 right = new Vector3(eyePoint.right.x, 0, eyePoint.right.z).normalized;
+        float curSpeedZ = walkSpeed * Input.GetAxis("Horizontal");
+        if (curSpeedX > 0.7f)
+        {
+            playerMeshRenderer.material = playerBackIdleMat;
+            catMeshRenderer.material = catBackIdleMat;
+            isLookingBehind = false;
+        }
+        else if (curSpeedX < -0.7f)
+        {
+            playerMeshRenderer.material = playerFrontIdleMat;
+            catMeshRenderer.material = catFrontIdleMat;
+            isLookingBehind = true;
+        }
+        else if (curSpeedZ > 0.7f)
+        {
+            if (isCatView)
+            {
+                playerMeshRenderer.material = playerLeftIdleMat;
+                catMeshRenderer.material = catRightIdleMat;
+            }
+            else
+            {
+                playerMeshRenderer.material = playerRightIdleMat;
+                catMeshRenderer.material = catLeftIdleMat;
+            }
+            isLookingBehind = false;
+        }
+        else if (curSpeedZ < -0.7f)
+        {
+            if (isCatView)
+            {
+                playerMeshRenderer.material = playerRightIdleMat;
+                catMeshRenderer.material = catLeftIdleMat;
+            }
+            else
+            {
+                playerMeshRenderer.material = playerLeftIdleMat;
+                catMeshRenderer.material = catRightIdleMat;
+            }
+            isLookingBehind = false;
+        }
+        moveDirection = Mathf.Abs(curSpeedX) > 0.7f ? forward * curSpeedX : right * curSpeedZ;
         characterController.Move(moveDirection * Time.deltaTime);
-        animator.SetBool("isMoving", moveDirection.magnitude > 0.01f);
+    }
+
+    private void DetectSwitchView()
+    {
+        if (isLookingBehind)
+        {
+            if (lookRotationX > lookXLimit - 1f)
+            {
+                switchViewSecCounter += Time.deltaTime;
+                float waitSec = 2f;
+                viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, switchViewSecCounter / waitSec);
+
+                if (switchViewSecCounter > waitSec)
+                {
+                    SwitchView();
+                }
+                return;
+            }
+        }
+
+        if (switchViewSecCounter > 0f)
+        {
+            switchViewSecCounter = 0f;
+            viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, 0);
+        }
+    }
+
+
+    private void SwitchView()
+    {
+        lookRotationX = 0f;
+        switchViewSecCounter = 0f;
+        StartCoroutine(SwitchViewFadeIn());
+        if (isCatView)
+        {
+            isCatView = false;
+            playerMeshRenderer.transform.localPosition = playerManifestPos;
+            playerMeshRenderer.transform.localEulerAngles = playerManifestRotation;
+            catMeshRenderer.transform.localPosition = catShadowPos;
+            catMeshRenderer.transform.localEulerAngles = catShadowRotation;
+        }
+        else
+        {
+            isCatView = true;
+            playerMeshRenderer.transform.localPosition = playerShadow.localPosition;
+            playerMeshRenderer.transform.localEulerAngles = playerShadow.localEulerAngles;
+            catMeshRenderer.transform.localPosition = catManifest.localPosition;
+            catMeshRenderer.transform.localEulerAngles = catManifest.localEulerAngles;
+        }
+    }
+
+    private IEnumerator SwitchViewFadeIn()
+    {
+        for (float i = 1f; i > 0f; i = i - 0.05f)
+        {
+            viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, i);
+            yield return new WaitForFixedUpdate();
+        }
+        viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, 0);
     }
 
     private void KeepEyesTrackingMouse()
@@ -116,9 +241,10 @@ public class PlayerController : MonoBehaviour
         playerCamera.transform.LookAt(eyePoint);
     }
 
-    private void FaceSpriteToCamera()
+    private void FacePlayerToCamera()
     {
-        playerSprite.transform.eulerAngles = new Vector3(0, eyePoint.eulerAngles.y, 0);
+        transform.eulerAngles = new Vector3(0, eyePoint.eulerAngles.y, 0);
     }
 
 }
+
