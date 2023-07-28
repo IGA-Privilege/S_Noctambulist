@@ -12,7 +12,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Camera playerCamera;
     [SerializeField] private Transform eyePoint;
     [SerializeField] private CharacterController characterController;
-    [SerializeField] private GameObject debuggingVisualSphere;
     [SerializeField] private MeshRenderer playerMeshRenderer;
     [SerializeField] private Material playerFrontIdleMat;
     [SerializeField] private Material playerBackIdleMat;
@@ -45,7 +44,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         MarkOriginalPosition();
-        SetMouseLocked();
+        //SetMouseLocked();
     }
 
     private void MarkOriginalPosition()
@@ -66,7 +65,6 @@ public class PlayerController : MonoBehaviour
     {
         KeepEyesTrackingMouse();
         AlignCameraToEyes();
-        HighlightLookPos();
         HandleMovement();
         DetectSwitchView();
         FacePlayerToCamera();
@@ -199,18 +197,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void HighlightLookPos()
-    {
-        Ray ray = new Ray(eyePoint.position, eyePoint.forward);
-        if (Physics.Raycast(ray, out RaycastHit hitInfo, maxInteractDistance))
-        {
-            debuggingVisualSphere.transform.position = hitInfo.point;
-        }
-        else
-        {
-            debuggingVisualSphere.transform.position = eyePoint.position + eyePoint.forward * maxInteractDistance;
-        }
-    }
 
     private void TryInteractWithObj()
     {
