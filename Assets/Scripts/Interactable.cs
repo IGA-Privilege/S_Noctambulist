@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Interactable : MonoBehaviour
 {
@@ -13,7 +14,8 @@ public class Interactable : MonoBehaviour
 
     [HideInInspector]
     public bool isInvestigated = false;
-    private bool canInteract = true;
+    [HideInInspector]
+    public bool canInteract = true;
 
     private void Awake()
     {
@@ -22,6 +24,7 @@ public class Interactable : MonoBehaviour
             canInteract = false;
         }
     }
+
 
     private void FixedUpdate()
     {
@@ -74,7 +77,17 @@ public class Interactable : MonoBehaviour
                     }
                 case InteractionType.OpenDiary:
                     {
-                        GameManager.Instance.OpenDiaryUI();
+                        GameManager.Instance.SetDiaryUIOpen(true);
+                        break;
+                    }
+                case InteractionType.OpenCloze:
+                    {
+                        GameManager.Instance.SetClozeUIOpen(true);
+                        break;
+                    }
+                case InteractionType.CatNPC:
+                    {
+                        PlayerInventory.Instance.PlayerGetsOpal();
                         break;
                     }
             }
@@ -82,9 +95,16 @@ public class Interactable : MonoBehaviour
     }
 
 
+    public IEnumerator ResetObjState()
+    {
+        yield return new WaitForSeconds(0);
+        canInteract = true;
+        isInvestigated = false;
+    }
+
 }
 
 enum InteractionType
 {
-    ShowImage, OpenDiary
+    ShowImage, OpenDiary, OpenCloze, CatNPC
 }

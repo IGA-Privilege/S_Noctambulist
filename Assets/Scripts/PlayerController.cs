@@ -30,12 +30,12 @@ public class PlayerController : MonoBehaviour
     private Vector3 playerManifestRotation;
     private Vector3 catShadowPos;
     private Vector3 catShadowRotation;
-    private bool isCatView = false;
+    public bool isCatView = false;
     private bool isLookingBehind = false;
     private float switchViewSecCounter = 0f;
     private float lookRotationX = 0;
     private float lookRotationY = 0;
-    private float lookSpeed = 2f;
+    private float lookSpeed = 800f;
     private float lookXLimit = 45f;
     private float walkSpeed = 2f;
     private Vector3 moveDirection = Vector3.zero;
@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        
         MarkOriginalPosition();
         //SetMouseLocked();
     }
@@ -55,11 +56,6 @@ public class PlayerController : MonoBehaviour
         catShadowRotation = catMeshRenderer.transform.localEulerAngles;
     }
 
-    private static void SetMouseLocked()
-    {
-        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-        UnityEngine.Cursor.visible = false;
-    }
 
     private void Update()
     {
@@ -190,9 +186,9 @@ public class PlayerController : MonoBehaviour
     {
         if (playerCamera.isActiveAndEnabled)
         {
-            lookRotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
+            lookRotationX += -Input.GetAxis("Mouse Y") * lookSpeed * Time.deltaTime;
             lookRotationX = Mathf.Clamp(lookRotationX, -lookXLimit, lookXLimit);
-            lookRotationY += Input.GetAxis("Mouse X") * lookSpeed;
+            lookRotationY += Input.GetAxis("Mouse X") * lookSpeed * Time.deltaTime;
             eyePoint.rotation = Quaternion.Euler(lookRotationX, lookRotationY, 0);
         }
     }
