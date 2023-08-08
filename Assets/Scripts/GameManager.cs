@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -12,6 +13,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image itemInfoImage;
     [SerializeField] private RectTransform diaryUI;
     [SerializeField] private RectTransform clozeUI;
+    [SerializeField] private RectTransform itemExchangeUI;
+    [SerializeField] private PlayerController playerController;
+    [SerializeField] private Material floorAndSkyMat;
+    [SerializeField] private Color32 catViewColor;
+    [SerializeField] private Color32 humanViewColor;
+    [SerializeField] private Light[] lights;
 
     public static GameManager Instance { get; private set; }
 
@@ -20,8 +27,6 @@ public class GameManager : MonoBehaviour
         Instance = this;
         LockCursor();
     }
-
-
 
     private void Update()
     {
@@ -37,8 +42,37 @@ public class GameManager : MonoBehaviour
                 diaryUI.gameObject.SetActive(false);
             }
         }
+
+        UpdateFloorAndSkyMat();
+        UpdateLightsColor();
     }
 
+    private void UpdateLightsColor()
+    {
+        for (int i = 0; i < lights.Length; i++)
+        {
+            if (playerController.isCatView)
+            {
+                lights[i].color = (Color)catViewColor;
+            }
+            else
+            {
+                lights[i].color = (Color)humanViewColor;
+            }
+        }
+    }
+
+    private void UpdateFloorAndSkyMat()
+    {
+        if (playerController.isCatView)
+        {
+            floorAndSkyMat.color = (Color)catViewColor;
+        }
+        else
+        {
+            floorAndSkyMat.color = (Color)humanViewColor;
+        }
+    }
 
     public static Vector3 GetWorldMousePosition(Camera activeCamera)
     {
@@ -78,6 +112,21 @@ public class GameManager : MonoBehaviour
     {
         itemInfoUI.gameObject.SetActive(false);
         UnfreezeTime();
+    }
+
+    public void SetItemExchangeUIOpen(bool isOpen)
+    {
+        itemExchangeUI.gameObject.SetActive(isOpen);
+        if (isOpen)
+        {
+            FreezeTime();
+            UnlockCursor();
+        }
+        else
+        {
+            UnfreezeTime();
+            LockCursor();
+        }
     }
 
 

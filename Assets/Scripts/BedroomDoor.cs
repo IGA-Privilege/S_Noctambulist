@@ -5,11 +5,19 @@ using UnityEngine;
 public class BedroomDoor : MonoBehaviour
 {
     [SerializeField] ClozeTextUI cloze;
-    private readonly float doorOpenRotationY = 240f;
+    [SerializeField] Collider doorCollider;
+    private readonly float doorOpenRotationY = -90f;
+    private Quaternion originalRotation;
+    private float eulerY = 0f;
     private bool _hasOpened = false;
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            StartCoroutine(OpenDoor());
+        }
+
         if (!_hasOpened)
         {
             if (cloze.HasFinished)
@@ -21,13 +29,19 @@ public class BedroomDoor : MonoBehaviour
 
     }
 
+    private void Awake()
+    {
+        originalRotation = transform.rotation;
+    }
+
     private IEnumerator OpenDoor()
     {
-        while (transform.rotation.eulerAngles.y > doorOpenRotationY)
+        doorCollider.enabled = false;
+        while (true)
         {
             float openSpeed = 1f;
-            float rotationY = Mathf.Lerp(transform.rotation.eulerAngles.y, doorOpenRotationY, openSpeed * Time.deltaTime);
-            transform.rotation = Quaternion.Euler(0f, rotationY, 0f);
+            eulerY = Mathf.Lerp(eulerY, doorOpenRotationY, openSpeed * Time.deltaTime);
+            transform.rotation = originalRotation * Quaternion.Euler(0f, eulerY, 0f);
             yield return new WaitForSeconds(0);
         }
     }

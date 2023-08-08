@@ -6,11 +6,15 @@ using UnityEngine.UI;
 
 public class PlayerInventory : MonoBehaviour
 {
+    public DraggableIcon draggableIconPref;
+    [HideInInspector] public DraggableIcon instantiatedDraggableIcon;
+
     [SerializeField] private Item Nothing;
     [SerializeField] private Item CatsEye;
-    [SerializeField] private Item Opal;
-    [SerializeField] private Image itemSlotIcon01;
-    [SerializeField] private Image itemSlotIcon02;
+    [SerializeField] public Item Opal;
+    [SerializeField] private InventorySlotButton itemSlot01;
+    [SerializeField] private InventorySlotButton itemSlot02;
+
 
     private ItemWrapper item01;
     private ItemWrapper item02;
@@ -57,8 +61,8 @@ public class PlayerInventory : MonoBehaviour
 
     private void SyncInventoryUI()
     {
-        itemSlotIcon01.sprite = item01.spriteIcon;
-        itemSlotIcon02.sprite = item02.spriteIcon;
+        itemSlot01.SetItem(item01);
+        itemSlot02.SetItem(item02);
     }
 }
 

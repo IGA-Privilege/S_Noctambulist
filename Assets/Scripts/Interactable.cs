@@ -87,7 +87,7 @@ public class Interactable : MonoBehaviour
                     }
                 case InteractionType.CatNPC:
                     {
-                        PlayerInventory.Instance.PlayerGetsOpal();
+                        GameManager.Instance.SetItemExchangeUIOpen(true);
                         break;
                     }
             }

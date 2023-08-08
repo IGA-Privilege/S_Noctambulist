@@ -6,8 +6,12 @@ using UnityEngine;
 public class StorageDoor : MonoBehaviour
 {
     [SerializeField] private PlayerController player;
-    private readonly float doorOpenRotationY = 120f;
+    [SerializeField] private Collider doorCollider;
+    private readonly float doorOpenRotationY = -90f;
+    private float eulerY = 0f;
+    private Quaternion originalRotation;
     private bool _hasOpened = false;
+
 
     private void Update()
     {
@@ -22,15 +26,19 @@ public class StorageDoor : MonoBehaviour
 
     }
 
-
+    private void Awake()
+    {
+        originalRotation = transform.rotation;
+    }
 
     private IEnumerator OpenDoor()
     {
-        while (transform.rotation.eulerAngles.y > doorOpenRotationY)
+        doorCollider.enabled = false;
+        while (true)
         {
             float openSpeed = 1f;
-            float rotationY = Mathf.Lerp(transform.rotation.eulerAngles.y, doorOpenRotationY, openSpeed * Time.deltaTime);
-            transform.rotation = Quaternion.Euler(0f, rotationY, 0f);
+            eulerY = Mathf.Lerp(eulerY, doorOpenRotationY, openSpeed * Time.deltaTime);
+            transform.rotation = originalRotation * Quaternion.Euler(0f, eulerY, 0f);
             yield return new WaitForSeconds(0);
         }
     }
