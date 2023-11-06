@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +13,10 @@ public class PlayerController : MonoBehaviour
     public static PlayerController Instance { get; private set; }
 
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private Camera theaterCamera;
+    [SerializeField] private TheaterBox theaterBox;
     [SerializeField] private Transform eyePoint;
+    [SerializeField] private RectTransform inventoryUI;
     [SerializeField] private CharacterController characterController;
     [SerializeField] private MeshRenderer playerMeshRenderer;
     [SerializeField] private Material playerFrontIdleMat;
@@ -27,32 +31,46 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform playerShadow;
     [SerializeField] private Transform catManifest;
     [SerializeField] private Image viewSwitchingCurtain;
-    [SerializeField] private Camera miniCamera;
+    //[SerializeField] private Material theaterBGMaterial;
+    //[SerializeField] private Color theaterCatColor;
+    //[SerializeField] private Color theaterGirlColor;
 
+    private bool _canMove = true;
+    private Vector3 floorPos;
     private Vector3 playerManifestPos;
     private Vector3 playerManifestRotation;
     private Vector3 catShadowPos;
     private Vector3 catShadowRotation;
     public bool isCatView = false;
+    public bool canControl = true;
     private bool isLookingBehind = false;
     private float switchViewSecCounter = 0f;
     private float lookRotationX = 0;
     private float lookRotationY = 0;
     private float lookSpeed = 800f;
-    private float lookXLimit = 45f;
+    private float lookXLimit = 20f;
     private float walkSpeed = 2f;
     private Vector3 moveDirection = Vector3.zero;
     float maxInteractDistance = 2.5f;
+    Vector3 camLookPoint { get { return eyePoint.position + new Vector3(0, 0.25f, 0); } }
+
 
     private void Awake()
     {
         Instance = this;
         MarkOriginalPosition();
-        //SetMouseLocked();
+        playerCamera.gameObject.SetActive(true);
+        theaterCamera.gameObject.SetActive(false);
+    }
+
+    private void Start()
+    {
+        theaterBox.PlayGirlAnimation();
     }
 
     private void MarkOriginalPosition()
     {
+        floorPos = transform.position;
         playerManifestPos = playerMeshRenderer.transform.localPosition;
         playerManifestRotation = playerMeshRenderer.transform.localEulerAngles;
         catShadowPos = catMeshRenderer.transform.localPosition;
@@ -62,23 +80,24 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        KeepEyesTrackingMouse();
-        AlignCameraToEyes();
-        HandleMovement();
-        DetectSwitchView();
+        if (canControl)
+        {
+            KeepEyesTrackingMouse();
+            AlignCameraToEyes();
+            HandleMovement();
+            DetectSwitchView();
+        }
+
         FacePlayerToCamera();
-        AlignMiniCamera();
 
         if (Input.GetMouseButtonUp(0))
         {
             TryInteractWithObj();
         }
-    }
-
-    private void AlignMiniCamera()
-    {
-        miniCamera.transform.position = transform.position;
-        miniCamera.transform.forward = transform.forward;
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            StartCoroutine(JumpToFloor());
+        }
     }
 
     private void HandleMovement()
@@ -128,7 +147,11 @@ public class PlayerController : MonoBehaviour
             isLookingBehind = false;
         }
         moveDirection = Mathf.Abs(curSpeedX) > 0.7f ? forward * curSpeedX : right * curSpeedZ;
-        characterController.Move(moveDirection * Time.deltaTime);
+
+        if (_canMove)
+        {
+            characterController.Move(moveDirection * Time.deltaTime);
+        }
     }
 
     private void DetectSwitchView()
@@ -143,7 +166,7 @@ public class PlayerController : MonoBehaviour
 
                 if (switchViewSecCounter > waitSec)
                 {
-                    SwitchView();
+                    StartCoroutine(SwitchView());
                 }
                 return;
             }
@@ -157,11 +180,32 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private void SwitchView()
+    private IEnumerator SwitchView()
     {
         lookRotationX = 0f;
         switchViewSecCounter = 0f;
-        StartCoroutine(SwitchViewFadeIn());
+        playerCamera.gameObject.SetActive(false);
+        theaterCamera.gameObject.SetActive(true);
+        inventoryUI.gameObject.SetActive(false);
+
+        yield return StartCoroutine(SwitchViewFadeIn());
+
+        if (isCatView)
+        {
+            theaterBox.PlayGirlAnimation();
+        }
+        else
+        {
+            theaterBox.PlayCatAnimation();
+        }
+
+        yield return new WaitForSeconds(5.5f);
+        yield return StartCoroutine(SwitchViewFadeOut());
+
+        playerCamera.gameObject.SetActive(true);
+        theaterCamera.gameObject.SetActive(false);
+        inventoryUI.gameObject.SetActive(true);
+
         if (isCatView)
         {
             isCatView = false;
@@ -178,16 +222,28 @@ public class PlayerController : MonoBehaviour
             catMeshRenderer.transform.localPosition = catManifest.localPosition;
             catMeshRenderer.transform.localEulerAngles = catManifest.localEulerAngles;
         }
+
+        yield return StartCoroutine(SwitchViewFadeIn());
     }
 
     private IEnumerator SwitchViewFadeIn()
     {
         for (float i = 1f; i > 0f; i = i - 0.05f)
         {
-            viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, i);
+            viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, Mathf.Clamp(i, 0f, 1f));
             yield return new WaitForFixedUpdate();
         }
         viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, 0);
+    }
+
+    private IEnumerator SwitchViewFadeOut()
+    {
+        for (float i = 1f; i > 0f; i = i - 0.05f)
+        {
+            viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, 1 - Mathf.Clamp(i, 0f, 1f));
+            yield return new WaitForFixedUpdate();
+        }
+        viewSwitchingCurtain.color = new Color(viewSwitchingCurtain.color.r, viewSwitchingCurtain.color.g, viewSwitchingCurtain.color.b, viewSwitchingCurtain.color.a);
     }
 
     private void KeepEyesTrackingMouse()
@@ -204,7 +260,9 @@ public class PlayerController : MonoBehaviour
 
     private void TryInteractWithObj()
     {
-        Ray ray = new Ray(eyePoint.position, eyePoint.forward);
+        //Ray ray = new Ray(eyePoint.position, eyePoint.forward);
+        Ray ray = new Ray(camLookPoint, playerCamera.transform.forward);
+
         if (Physics.Raycast(ray, out RaycastHit hitInfo, maxInteractDistance))
         {
             if (hitInfo.collider.TryGetComponent<Interactable>(out Interactable interactableObj))
@@ -215,12 +273,34 @@ public class PlayerController : MonoBehaviour
             {
                 musicBoxButton.OnPlayerPress();
             }
+            else if (hitInfo.collider.TryGetComponent<JumpPlatform>(out JumpPlatform jumpPlatform))
+            {
+                transform.DOJump(jumpPlatform.transform.position + new Vector3(0, 0.482f, 0), 0.6f, 1, 1f);
+                SetPlayerCanMove(false);
+                jumpPlatform.OnPlayerJumpOnto();
+                if (!jumpPlatform.isRightPlaform)
+                {
+                    StartCoroutine(JumpToFloor());
+                }
+            }
         }
+    }
+
+    public IEnumerator JumpToFloor()
+    {
+        yield return new WaitForSeconds(1.1f);
+        transform.DOJump(new Vector3(transform.position.x, floorPos.y, transform.position.z), 0f, 1, 1f);
+        SetPlayerCanMove(true);
+    }
+
+    private void SetPlayerCanMove(bool canMove)
+    {
+        _canMove = canMove;
     }
 
     private void AlignCameraToEyes()
     {
-        float cameraDistanceFromPlayer = 1.0f;
+        float cameraDistanceFromPlayer = 1.8f;
 
         Ray ray = new Ray(eyePoint.position, -eyePoint.forward);
         if (Physics.Raycast(ray, out RaycastHit hitInfo, cameraDistanceFromPlayer))
@@ -229,16 +309,20 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            playerCamera.transform.position = eyePoint.position - eyePoint.forward * cameraDistanceFromPlayer;
+            playerCamera.transform.position = camLookPoint - eyePoint.forward * cameraDistanceFromPlayer;
         }
 
-        playerCamera.transform.LookAt(eyePoint);
+        playerCamera.transform.LookAt(camLookPoint);
     }
+
+
 
     private void FacePlayerToCamera()
     {
         transform.eulerAngles = new Vector3(0, eyePoint.eulerAngles.y, 0);
     }
+
+
 
 }
 

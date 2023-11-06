@@ -61,7 +61,7 @@ public class Interactable : MonoBehaviour
         }
     }
 
-    public void OnPlayerInteract()
+    public virtual void OnPlayerInteract()
     {
         if (canInteract)
         {
@@ -106,5 +106,5 @@ public class Interactable : MonoBehaviour
 
 enum InteractionType
 {
-    ShowImage, OpenDiary, OpenCloze, CatNPC
+    ShowImage, OpenDiary, OpenCloze, CatNPC, CodeLock
 }

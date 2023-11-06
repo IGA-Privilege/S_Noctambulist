@@ -13,7 +13,9 @@ public class InventorySlotButton : Button
     protected override void Awake()
     {
         base.Awake();
-        _iconImage = GetComponent<Image>();
+        Image[] icons;
+        icons = GetComponentsInChildren<Image>();
+        _iconImage = icons[1];
     }
 
     public bool IsButtonDown()

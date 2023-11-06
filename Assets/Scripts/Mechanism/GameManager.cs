@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image itemInfoImage;
     [SerializeField] private RectTransform diaryUI;
     [SerializeField] private RectTransform clozeUI;
+    [SerializeField] private CodeLock codeLockUI;
     [SerializeField] private RectTransform itemExchangeUI;
     [SerializeField] private ItemExchangeButton itemExchangeButton;
     [SerializeField] private PlayerController playerController;
@@ -37,10 +38,27 @@ public class GameManager : MonoBehaviour
             {
                 CloseItemInfoUI();
             }
-            else if (diaryUI.gameObject.activeInHierarchy)
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (diaryUI.gameObject.activeInHierarchy)
             {
-                // 后续做出日记后这里改为让日记本翻页
-                diaryUI.gameObject.SetActive(false);
+                SetDiaryUIOpen(false);
+            }
+        }
+
+        if (!GetIsAnyUIOpen())
+        {
+            if (Input.GetKey(KeyCode.LeftAlt))
+            {
+                UnlockCursor();
+                playerController.canControl = false;
+            }
+            else
+            {
+                LockCursor();
+                playerController.canControl = true;
             }
         }
 
@@ -82,24 +100,9 @@ public class GameManager : MonoBehaviour
         return hitInfo.point;
     }
 
-    public bool GetIsUIOpen(GameUIType ui)
+    public bool GetIsAnyUIOpen()
     {
-        switch (ui)
-        {
-            case GameUIType.ItemInfoUI:
-                {
-                    return itemInfoUI.gameObject.activeInHierarchy;
-                }
-            case GameUIType.DiaryUI:
-                {
-                    return diaryUI.gameObject.activeInHierarchy;
-                }
-            case GameUIType.ClozeUI:
-                {
-                    return clozeUI.gameObject.activeInHierarchy;
-                }
-        }
-        return false;
+        return (itemInfoUI.gameObject.activeInHierarchy || diaryUI.gameObject.activeInHierarchy || clozeUI.gameObject.activeInHierarchy);
     }
 
     public void OpenItemInfoUI(Sprite itemSprite)
@@ -131,19 +134,36 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void OpenCodeLock(int answer1, int answer2, int answer3, int answer4)
+    {
+        playerController.canControl = false;
+        codeLockUI.gameObject.SetActive(true);
+        codeLockUI.InitCodeLock(answer1, answer2, answer3, answer4);
+    }
+
+    public void CloseCodeLock()
+    {
+        if (!codeLockUI.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+        playerController.canControl = true;
+        codeLockUI.gameObject.SetActive(false);
+    }
+
 
     public void SetDiaryUIOpen(bool isOpen)
     {
         diaryUI.gameObject.SetActive(isOpen);
         if (isOpen)
         {
-            FreezeTime();
             UnlockCursor();
+            playerController.canControl = false;
         }
         else
         {
-            UnfreezeTime();
             LockCursor();
+            playerController.canControl = true;
         }
     }
 
