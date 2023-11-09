@@ -21,6 +21,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Color32 catViewColor;
     [SerializeField] private Color32 humanViewColor;
     [SerializeField] private Light[] lights;
+    [SerializeField] private List<MeshRenderer> livingRoomWalls;
+    [SerializeField] private List<MeshRenderer> storageWalls;
+    [SerializeField] private List<MeshRenderer> bedroomWalls;
+    [SerializeField] private Material hazeWallMat;
+    [SerializeField] private Material BlackWallMat;
+    private List<Material> livingRoomWallsMatStorer = new List<Material>();
+    private List<Material> storageWallsMatStorer = new List<Material>();
+    private List<Material> bedroomWallsMatStorer = new List<Material>();
 
     public static GameManager Instance { get; private set; }
 
@@ -30,8 +38,62 @@ public class GameManager : MonoBehaviour
         LockCursor();
     }
 
+    private void Start()
+    {
+        RememberAllWallsMaterial();
+        SetAllWallsToHaze();
+    }
+
+    private void RememberAllWallsMaterial()
+    {
+        livingRoomWallsMatStorer.Clear();
+        foreach (MeshRenderer wall in livingRoomWalls)
+        {
+            livingRoomWallsMatStorer.Add(new Material(wall.material));
+        }
+        storageWallsMatStorer.Clear();
+        foreach (MeshRenderer wall in storageWalls)
+        {
+            storageWallsMatStorer.Add(new Material(wall.material));
+        }
+        bedroomWallsMatStorer.Clear();
+        foreach (MeshRenderer wall in bedroomWalls)
+        {
+            bedroomWallsMatStorer.Add(new Material(wall.material));
+        }
+    }
+
+    private void SetAllWallsToHaze()
+    {
+        foreach (MeshRenderer wall in livingRoomWalls)
+        {
+            wall.material = hazeWallMat;
+        }
+        foreach (MeshRenderer wall in storageWalls)
+        {
+            wall.material = hazeWallMat;
+        }
+        foreach (MeshRenderer wall in bedroomWalls)
+        {
+            wall.material = hazeWallMat;
+        }
+    }
+
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            DispelLivingRoomHaze();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            DispelBedroomHaze();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            DispelStorageHaze();
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             if (itemInfoUI.gameObject.activeInHierarchy)
@@ -203,6 +265,32 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
     }
+
+    private void DispelLivingRoomHaze()
+    {
+        for (int i = 0; i < livingRoomWalls.Count; i++)
+        {
+            livingRoomWalls[i].material = livingRoomWallsMatStorer[i];
+        }
+    }
+
+    private void DispelStorageHaze()
+    {
+        for (int i = 0; i < storageWalls.Count; i++)
+        {
+            storageWalls[i].material = storageWallsMatStorer[i];
+        }
+    }
+
+    private void DispelBedroomHaze()
+    {
+        for (int i = 0; i < bedroomWalls.Count; i++)
+        {
+            bedroomWalls[i].material = bedroomWallsMatStorer[i];
+        }
+    }
+
+
 }
 
 public enum GameUIType

@@ -18,22 +18,25 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform eyePoint;
     [SerializeField] private RectTransform inventoryUI;
     [SerializeField] private CharacterController characterController;
-    [SerializeField] private MeshRenderer playerMeshRenderer;
+    [SerializeField] private GameObject playerModel;
+    [SerializeField] private MeshRenderer playerShadow;
+    [SerializeField] private GameObject catModel;
+    [SerializeField] private MeshRenderer catShadow;
     [SerializeField] private Material playerFrontIdleMat;
     [SerializeField] private Material playerBackIdleMat;
     [SerializeField] private Material playerLeftIdleMat;
     [SerializeField] private Material playerRightIdleMat;
-    [SerializeField] private MeshRenderer catMeshRenderer;
     [SerializeField] private Material catFrontIdleMat;
     [SerializeField] private Material catBackIdleMat;
     [SerializeField] private Material catLeftIdleMat;
     [SerializeField] private Material catRightIdleMat;
-    [SerializeField] private Transform playerShadow;
-    [SerializeField] private Transform catManifest;
     [SerializeField] private Image viewSwitchingCurtain;
     //[SerializeField] private Material theaterBGMaterial;
     //[SerializeField] private Color theaterCatColor;
     //[SerializeField] private Color theaterGirlColor;
+    [SerializeField] private GameObject debugSphere;
+    [SerializeField] private Animator girlAnimator;
+    [SerializeField] private Animator catAnimator;
 
     private bool _canMove = true;
     private Vector3 floorPos;
@@ -71,20 +74,21 @@ public class PlayerController : MonoBehaviour
     private void MarkOriginalPosition()
     {
         floorPos = transform.position;
-        playerManifestPos = playerMeshRenderer.transform.localPosition;
-        playerManifestRotation = playerMeshRenderer.transform.localEulerAngles;
-        catShadowPos = catMeshRenderer.transform.localPosition;
-        catShadowRotation = catMeshRenderer.transform.localEulerAngles;
     }
 
+    public void MoveSingleDistance(float moveDistance)
+    {
+        characterController.Move(moveDirection * moveDistance);
+        StartCoroutine(SwitchViewFadeIn());
+    }
 
     private void Update()
     {
         if (canControl)
         {
             KeepEyesTrackingMouse();
-            AlignCameraToEyes();
             HandleMovement();
+            AlignCameraToEyes();
             DetectSwitchView();
         }
 
@@ -103,32 +107,36 @@ public class PlayerController : MonoBehaviour
     private void HandleMovement()
     {
         Vector3 forward = new Vector3(eyePoint.forward.x, 0, eyePoint.forward.z).normalized;
-        float curSpeedX = walkSpeed * Input.GetAxis("Vertical");
+        float curSpeedX = walkSpeed * Input.GetAxisRaw("Vertical");
         Vector3 right = new Vector3(eyePoint.right.x, 0, eyePoint.right.z).normalized;
-        float curSpeedZ = walkSpeed * Input.GetAxis("Horizontal");
+        float curSpeedZ = walkSpeed * Input.GetAxisRaw("Horizontal");
         if (curSpeedX > 0.7f)
         {
-            playerMeshRenderer.material = playerBackIdleMat;
-            catMeshRenderer.material = catBackIdleMat;
+            playerModel.transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+            catModel.transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+            playerShadow.material = playerBackIdleMat;
+            catShadow.material = catBackIdleMat;
             isLookingBehind = false;
         }
         else if (curSpeedX < -0.7f)
         {
-            playerMeshRenderer.material = playerFrontIdleMat;
-            catMeshRenderer.material = catFrontIdleMat;
+            playerModel.transform.rotation = Quaternion.LookRotation(-1f * transform.forward, Vector3.up);
+            catModel.transform.rotation = Quaternion.LookRotation(-1f * transform.forward, Vector3.up);
+            playerShadow.material = playerFrontIdleMat;
+            catShadow.material = catFrontIdleMat;
             isLookingBehind = true;
         }
         else if (curSpeedZ > 0.7f)
         {
             if (isCatView)
             {
-                playerMeshRenderer.material = playerLeftIdleMat;
-                catMeshRenderer.material = catRightIdleMat;
+                playerShadow.material = playerLeftIdleMat;
+                catModel.transform.rotation = Quaternion.LookRotation(transform.right, Vector3.up);
             }
             else
             {
-                playerMeshRenderer.material = playerRightIdleMat;
-                catMeshRenderer.material = catLeftIdleMat;
+                playerModel.transform.rotation = Quaternion.LookRotation(transform.right, Vector3.up);
+                catShadow.material = catLeftIdleMat;
             }
             isLookingBehind = false;
         }
@@ -136,13 +144,13 @@ public class PlayerController : MonoBehaviour
         {
             if (isCatView)
             {
-                playerMeshRenderer.material = playerRightIdleMat;
-                catMeshRenderer.material = catLeftIdleMat;
+                playerShadow.material = playerRightIdleMat;
+                catModel.transform.rotation = Quaternion.LookRotation(-1f * transform.right, Vector3.up);
             }
             else
             {
-                playerMeshRenderer.material = playerLeftIdleMat;
-                catMeshRenderer.material = catRightIdleMat;
+                playerModel.transform.rotation = Quaternion.LookRotation(-1f * transform.right, Vector3.up);
+                catShadow.material = catRightIdleMat;
             }
             isLookingBehind = false;
         }
@@ -151,7 +159,23 @@ public class PlayerController : MonoBehaviour
         if (_canMove)
         {
             characterController.Move(moveDirection * Time.deltaTime);
+            if (moveDirection.magnitude != 0)
+            {
+                girlAnimator.SetBool("isMoving", true);
+                catAnimator.SetBool("isMoving", true);
+            }
+            else
+            {
+                girlAnimator.SetBool("isMoving", false);
+                catAnimator.SetBool("isMoving", false);
+            }
         }
+        else
+        {
+            girlAnimator.SetBool("isMoving", false);
+            catAnimator.SetBool("isMoving", false);
+        }
+
     }
 
     private void DetectSwitchView()
@@ -209,18 +233,18 @@ public class PlayerController : MonoBehaviour
         if (isCatView)
         {
             isCatView = false;
-            playerMeshRenderer.transform.localPosition = playerManifestPos;
-            playerMeshRenderer.transform.localEulerAngles = playerManifestRotation;
-            catMeshRenderer.transform.localPosition = catShadowPos;
-            catMeshRenderer.transform.localEulerAngles = catShadowRotation;
+            playerModel.gameObject.SetActive(true);
+            catModel.gameObject.SetActive(false);
+            catShadow.gameObject.SetActive(true);
+            playerShadow.gameObject.SetActive(false);
         }
         else
         {
             isCatView = true;
-            playerMeshRenderer.transform.localPosition = playerShadow.localPosition;
-            playerMeshRenderer.transform.localEulerAngles = playerShadow.localEulerAngles;
-            catMeshRenderer.transform.localPosition = catManifest.localPosition;
-            catMeshRenderer.transform.localEulerAngles = catManifest.localEulerAngles;
+            playerModel.gameObject.SetActive(false);
+            catModel.gameObject.SetActive(true);
+            catShadow.gameObject.SetActive(false);
+            playerShadow.gameObject.SetActive(true);
         }
 
         yield return StartCoroutine(SwitchViewFadeIn());
@@ -313,16 +337,12 @@ public class PlayerController : MonoBehaviour
         }
 
         playerCamera.transform.LookAt(camLookPoint);
+        debugSphere.transform.position = camLookPoint;
     }
-
-
 
     private void FacePlayerToCamera()
     {
         transform.eulerAngles = new Vector3(0, eyePoint.eulerAngles.y, 0);
     }
-
-
-
 }
 

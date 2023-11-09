@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e0ef5b8f7b5261e4795eb1ce8398f598
+guid: 047cb6d2c9d63eb4f9a22b26e7120898
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
@@ -33,10 +33,10 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: "\u9AA8\u67B6|\u9AA8\u67B6Action"
-      takeName: "\u9AA8\u67B6|\u9AA8\u67B6Action"
-      internalID: -4139047674318071871
-      firstFrame: 5
+      name: "\u9AA8\u67B6|\u9AA8\u67B6|\u9AA8\u67B6|\u9AA8\u67B6Action"
+      takeName: "\u9AA8\u67B6|\u9AA8\u67B6|\u9AA8\u67B6|\u9AA8\u67B6Action"
+      internalID: -5076046132061127165
+      firstFrame: 4
       lastFrame: 23
       wrapMode: 0
       orientationOffsetY: 0
@@ -60,7 +60,7 @@ ModelImporter:
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+      additiveReferencePoseFrame: 8
     isReadable: 0
   meshes:
     lODScreenPercentages: []

@@ -5,7 +5,7 @@ using UnityEngine;
 public class CatNPC : MonoBehaviour
 {
     [SerializeField] private PlayerController player;
-    [SerializeField] private MeshRenderer renderer;
+    [SerializeField] private GameObject renderer;
 
     private void Update()
     {
@@ -16,11 +16,11 @@ public class CatNPC : MonoBehaviour
     {
         if (player.isCatView)
         {
-            renderer.enabled = true;
+            renderer.gameObject.SetActive(true);
         }
         else
         {
-            renderer.enabled = false;
+            renderer.gameObject.SetActive(false);
         }
     }
 }

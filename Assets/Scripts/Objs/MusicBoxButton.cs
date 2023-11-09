@@ -9,6 +9,8 @@ public class MusicBoxButton : MonoBehaviour
     [Range(1, 5)]
     [SerializeField] private int buttonIndex;
     [SerializeField] private MusicBox musicBox;
+    [SerializeField] private GameObject defaultModel;
+    [SerializeField] private GameObject singingModel;
 
     private AudioSource _audioSource;
     private Vector3 initialLocalScale;
@@ -17,6 +19,7 @@ public class MusicBoxButton : MonoBehaviour
     {
         _audioSource = GetComponent<AudioSource>();
         initialLocalScale = transform.localScale;
+        singingModel.SetActive(false);
     }
 
     public void OnPlayerPress()
@@ -69,9 +72,11 @@ public class MusicBoxButton : MonoBehaviour
 
     public IEnumerator PlayPressedAnim()
     {
-        transform.localScale = new Vector3(transform.localScale.x, initialLocalScale.y * 0.85f, transform.localScale.z);
+        defaultModel.SetActive(false);
+        singingModel.SetActive(true);
         yield return new WaitForSeconds(0.6f);
-        transform.localScale = initialLocalScale;
+        defaultModel.SetActive(true);
+        singingModel.SetActive(false);
     }
 
     private void PlayPressedAudio()
