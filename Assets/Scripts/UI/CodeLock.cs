@@ -11,19 +11,21 @@ public class CodeLock : MonoBehaviour
     [SerializeField] private CodeLockUnit unit3;
     [SerializeField] private CodeLockUnit unit4;
     private int[] _answer;
+    private bool isRewardHumanFoot;
 
     private void Start()
     {
         SelectedUnit = unit1;
     }
 
-    public void InitCodeLock(int answer1, int answer2, int answer3, int answer4)
+    public void InitCodeLock(int answer1, int answer2, int answer3, int answer4, bool isHumanFoot)
     {
         _answer = new int[]{ answer1, answer2, answer3, answer4 };
         unit1.Number = 0;
         unit2.Number = 0;
         unit3.Number = 0;
         unit4.Number = 0;
+        isRewardHumanFoot = isHumanFoot;
     }
 
     private void Update()
@@ -53,9 +55,16 @@ public class CodeLock : MonoBehaviour
 
     private IEnumerator Unlock()
     {
-        Debug.Log(000);
+        Debug.Log("Solved Code Puzzle!");
         yield return new WaitForSeconds(0.5f);
-
+        if (isRewardHumanFoot)
+        {
+            PlayerInventory.Instance.PlayerGetsHumanFoot();
+        }
+        else
+        {
+            PlayerInventory.Instance.PlayerGetsCatTail();
+        }
         GameManager.Instance.CloseCodeLock();
     }
 

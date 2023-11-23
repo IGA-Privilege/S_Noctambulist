@@ -15,6 +15,6 @@ public class Door : MonoBehaviour
 
     private void TeleportPlayerSingleDistance(PlayerController player)
     {
-        player.MoveSingleDistance(0.7f);
+        player.MoveSingleDistance(1.35f);
     }
 }

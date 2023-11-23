@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 catShadowPos;
     private Vector3 catShadowRotation;
     public bool isCatView = false;
-    public bool canControl = true;
+    public bool canControl { get; set; }
     private bool isLookingBehind = false;
     private float switchViewSecCounter = 0f;
     private float lookRotationX = 0;
@@ -60,6 +60,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        canControl = true;
         Instance = this;
         MarkOriginalPosition();
         playerCamera.gameObject.SetActive(true);
@@ -78,7 +79,28 @@ public class PlayerController : MonoBehaviour
 
     public void MoveSingleDistance(float moveDistance)
     {
-        characterController.Move(moveDirection * moveDistance);
+        StartCoroutine(MoveSingleDistance(moveDirection * moveDistance));
+        StartCoroutine(SwitchViewFadeIn());
+    }
+
+    public void TeleportPlayerTo(Vector3 position)
+    {
+        characterController.enabled = false;
+        transform.position = new Vector3(position.x, transform.position.y, position.z);
+        StartCoroutine(Teleport());
+    }
+
+    private IEnumerator Teleport()
+    {
+        yield return new WaitForFixedUpdate();
+        characterController.enabled = true;
+        yield return StartCoroutine(SwitchViewFadeIn());
+    }
+
+    public IEnumerator MoveSingleDistance(Vector3 movement)
+    {
+        yield return new WaitForEndOfFrame();
+        characterController.Move(movement);
         StartCoroutine(SwitchViewFadeIn());
     }
 
@@ -100,7 +122,7 @@ public class PlayerController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            StartCoroutine(JumpToFloor());
+            StartCoroutine(TeleportToFloor());
         }
     }
 
@@ -155,6 +177,7 @@ public class PlayerController : MonoBehaviour
             isLookingBehind = false;
         }
         moveDirection = Mathf.Abs(curSpeedX) > 0.7f ? forward * curSpeedX : right * curSpeedZ;
+        moveDirection.y = 0f;
 
         if (_canMove)
         {
@@ -314,6 +337,15 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(1.1f);
         transform.DOJump(new Vector3(transform.position.x, floorPos.y, transform.position.z), 0f, 1, 1f);
+        SetPlayerCanMove(true);
+    }
+
+    private IEnumerator TeleportToFloor()
+    {
+        yield return StartCoroutine(SwitchViewFadeOut());
+        transform.DOJump(new Vector3(transform.position.x, floorPos.y, transform.position.z), 0f, 1, 0.1f);
+        yield return new WaitForSeconds(0.3f);
+        yield return StartCoroutine(SwitchViewFadeIn());
         SetPlayerCanMove(true);
     }
 

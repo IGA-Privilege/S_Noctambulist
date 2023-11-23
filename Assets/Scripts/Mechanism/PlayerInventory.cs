@@ -18,6 +18,9 @@ public class PlayerInventory : MonoBehaviour
     [SerializeField] public Item Fish;
     [SerializeField] public Item HumanSkull;
     [SerializeField] private Item HumanHand;
+    [SerializeField] private Item HumanFoot;
+    [SerializeField] private Item CatsTail;
+    [SerializeField] private Item PowderyMoonlight;
     [SerializeField] private RectTransform itemSlotPref;
     [SerializeField] private RectTransform itemSlotParent;
 
@@ -50,6 +53,25 @@ public class PlayerInventory : MonoBehaviour
     public void PlayerGetsCatsEye()
     {
         ObtainNewItem(new ItemWrapper(CatsEye));
+    }
+
+    public void PlayerGetsPowderyMoonlight()
+    {
+        ObtainNewItem(new ItemWrapper(PowderyMoonlight));
+    }
+
+    public void PlayerGetsHumanFoot()
+    {
+        ObtainNewItem(new ItemWrapper(HumanFoot));
+    }
+
+    public void PlayerGetsHumanHand()
+    {
+        ObtainNewItem(new ItemWrapper(HumanHand));
+    }
+    public void PlayerGetsCatTail()
+    {
+        ObtainNewItem(new ItemWrapper(CatsTail));
     }
 
     public void PlayerGetsHumanSkull()

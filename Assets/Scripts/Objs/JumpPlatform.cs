@@ -6,6 +6,7 @@ using UnityEngine;
 public class JumpPlatform : MonoBehaviour
 {
     public bool isRightPlaform;
+    [SerializeField] private bool isBonusPlatform = false;
     [SerializeField] private MeshRenderer _meshRenderer1;
     [SerializeField] private MeshRenderer _meshRenderer2;
     [SerializeField] private ParticleSystem _jumpParticle;
@@ -20,6 +21,17 @@ public class JumpPlatform : MonoBehaviour
         {
             StartCoroutine(SpawnParticleEffect());
         }
+
+        if (isBonusPlatform)
+        {
+            StartCoroutine(GetBonusItem());
+        }
+    }
+
+    private IEnumerator GetBonusItem()
+    {
+        yield return new WaitForSeconds(1);
+        PlayerInventory.Instance.PlayerGetsPowderyMoonlight();
     }
 
     private IEnumerator SpawnParticleEffect()

@@ -9,10 +9,18 @@ public class CodeLockedObj : Interactable
     [SerializeField] private int _answer3;
     [SerializeField] private int _answer4;
 
+    [SerializeField] private GameObject humanViewModel;
+    [SerializeField] private GameObject catViewModel;
+
+    [SerializeField] private bool isHumanFoot;
+
     public override void OnPlayerInteract()
     {
         base.OnPlayerInteract();
-        GameManager.Instance.OpenCodeLock(_answer1, _answer2, _answer3, _answer4);
+        if (!PlayerController.Instance.isCatView)
+        {
+            GameManager.Instance.OpenCodeLock(_answer1, _answer2, _answer3, _answer4, isHumanFoot);
+        }
     }
 
     private void Update()
@@ -20,6 +28,20 @@ public class CodeLockedObj : Interactable
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             GameManager.Instance.CloseCodeLock();
+        }
+
+        if (humanViewModel != null && catViewModel != null)
+        {
+            if (PlayerController.Instance.isCatView)
+            {
+                catViewModel.SetActive(true);
+                humanViewModel.SetActive(false);
+            }
+            else
+            {
+                catViewModel.SetActive(false);
+                humanViewModel.SetActive(true);
+            }
         }
     }
 }

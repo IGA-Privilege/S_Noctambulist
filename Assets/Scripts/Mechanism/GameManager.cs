@@ -38,46 +38,6 @@ public class GameManager : MonoBehaviour
         LockCursor();
     }
 
-    private void Start()
-    {
-        RememberAllWallsMaterial();
-        SetAllWallsToHaze();
-    }
-
-    private void RememberAllWallsMaterial()
-    {
-        livingRoomWallsMatStorer.Clear();
-        foreach (MeshRenderer wall in livingRoomWalls)
-        {
-            livingRoomWallsMatStorer.Add(new Material(wall.material));
-        }
-        storageWallsMatStorer.Clear();
-        foreach (MeshRenderer wall in storageWalls)
-        {
-            storageWallsMatStorer.Add(new Material(wall.material));
-        }
-        bedroomWallsMatStorer.Clear();
-        foreach (MeshRenderer wall in bedroomWalls)
-        {
-            bedroomWallsMatStorer.Add(new Material(wall.material));
-        }
-    }
-
-    private void SetAllWallsToHaze()
-    {
-        foreach (MeshRenderer wall in livingRoomWalls)
-        {
-            wall.material = hazeWallMat;
-        }
-        foreach (MeshRenderer wall in storageWalls)
-        {
-            wall.material = hazeWallMat;
-        }
-        foreach (MeshRenderer wall in bedroomWalls)
-        {
-            wall.material = hazeWallMat;
-        }
-    }
 
     private void Update()
     {
@@ -164,7 +124,7 @@ public class GameManager : MonoBehaviour
 
     public bool GetIsAnyUIOpen()
     {
-        return (itemInfoUI.gameObject.activeInHierarchy || diaryUI.gameObject.activeInHierarchy || clozeUI.gameObject.activeInHierarchy);
+        return (itemInfoUI.gameObject.activeInHierarchy || diaryUI.gameObject.activeInHierarchy || clozeUI.gameObject.activeInHierarchy || itemExchangeUI.gameObject.activeInHierarchy || codeLockUI.gameObject.activeInHierarchy);
     }
 
     public void OpenItemInfoUI(Sprite itemSprite)
@@ -196,11 +156,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OpenCodeLock(int answer1, int answer2, int answer3, int answer4)
+    public void OpenCodeLock(int answer1, int answer2, int answer3, int answer4, bool isHumanFoot)
     {
         playerController.canControl = false;
         codeLockUI.gameObject.SetActive(true);
-        codeLockUI.InitCodeLock(answer1, answer2, answer3, answer4);
+        codeLockUI.InitCodeLock(answer1, answer2, answer3, answer4, isHumanFoot);
     }
 
     public void CloseCodeLock()

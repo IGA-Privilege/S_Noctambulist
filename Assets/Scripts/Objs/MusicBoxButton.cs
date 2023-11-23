@@ -9,8 +9,7 @@ public class MusicBoxButton : MonoBehaviour
     [Range(1, 5)]
     [SerializeField] private int buttonIndex;
     [SerializeField] private MusicBox musicBox;
-    [SerializeField] private GameObject defaultModel;
-    [SerializeField] private GameObject singingModel;
+
 
     private AudioSource _audioSource;
     private Vector3 initialLocalScale;
@@ -19,7 +18,6 @@ public class MusicBoxButton : MonoBehaviour
     {
         _audioSource = GetComponent<AudioSource>();
         initialLocalScale = transform.localScale;
-        singingModel.SetActive(false);
     }
 
     public void OnPlayerPress()
@@ -72,11 +70,7 @@ public class MusicBoxButton : MonoBehaviour
 
     public IEnumerator PlayPressedAnim()
     {
-        defaultModel.SetActive(false);
-        singingModel.SetActive(true);
         yield return new WaitForSeconds(0.6f);
-        defaultModel.SetActive(true);
-        singingModel.SetActive(false);
     }
 
     private void PlayPressedAudio()
@@ -85,31 +79,31 @@ public class MusicBoxButton : MonoBehaviour
         {
             case 1:
                 {
-                    _audioSource.clip = musicBox.rhythm01;
+                    //_audioSource.clip = musicBox.rhythm01;
                     _audioSource.Play();
                     break;
                 }
             case 2:
                 {
-                    _audioSource.clip = musicBox.rhythm02;
+                   // _audioSource.clip = musicBox.rhythm02;
                     _audioSource.Play();
                     break;
                 }
             case 3:
                 {
-                    _audioSource.clip = musicBox.rhythm03;
+                    //_audioSource.clip = musicBox.rhythm03;
                     _audioSource.Play();
                     break;
                 }
             case 4:
                 {
-                    _audioSource.clip = musicBox.rhythm04;
+                    //_audioSource.clip = musicBox.rhythm04;
                     _audioSource.Play();
                     break;
                 }
             case 5:
                 {
-                    _audioSource.clip = musicBox.rhythm05;
+                    //_audioSource.clip = musicBox.rhythm05;
                     _audioSource.Play();
                     break;
                 }

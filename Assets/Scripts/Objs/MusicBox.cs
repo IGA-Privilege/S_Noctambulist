@@ -6,11 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class MusicBox : MonoBehaviour
 {
-    public AudioClip rhythm01;
-    public AudioClip rhythm02;
-    public AudioClip rhythm03;
-    public AudioClip rhythm04;
-    public AudioClip rhythm05;
     [SerializeField] private AudioClip preSong;
     [SerializeField] private AudioClip song;
     [SerializeField] private MusicBoxButton button01;
@@ -18,6 +13,9 @@ public class MusicBox : MonoBehaviour
     [SerializeField] private MusicBoxButton button03;
     [SerializeField] private MusicBoxButton button04;
     [SerializeField] private MusicBoxButton button05;
+    [SerializeField] private MusicBoxButton button06;
+    [SerializeField] private MusicBoxButton button07;
+    [SerializeField] private MusicBoxButton button08;
 
     private AudioSource _audioSource;
     private bool _isWaitingButton02 = false;

@@ -9,27 +9,49 @@ public class ClozeTextUI : MonoBehaviour
     [SerializeField] TMP_InputField inputField01;
     [SerializeField] TMP_InputField inputField02;
     [SerializeField] TMP_InputField inputField03;
-    public bool HasFinished = false;
+    [SerializeField] TMP_InputField inputField04;
 
-    private readonly string answer01 = "cat";
-    private readonly string answer02 = "eye";
-    private readonly string answer03 = "Fish";
+    private readonly string firstAnswer01 = "cat";
+    private readonly string firstAnswer02 = "eye";
+    private readonly string secondAnswer01 = "FI";
+    private readonly string secondAnswer02 = "H";
+
+    [SerializeField] private RectTransform firstRiddle;
+    [SerializeField] private RectTransform secondRiddle;
     private bool _hasFirstRiddleSolved = false;
     private bool _hasSecondRiddleSolved = false;
 
+    public bool HasFinished { get { return _hasFirstRiddleSolved && _hasSecondRiddleSolved; } }
+
+    private void Start()
+    {
+        firstRiddle.gameObject.SetActive(true);
+        secondRiddle.gameObject.SetActive(false);
+        ClearText();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            OnPlayerSubmitAnswer();
+        }
+    }
+
+
     public void OnPlayerSubmitAnswer()
     {
-        if (inputField01.text == answer01 && inputField02.text == answer02)
+        if (inputField01.text.ToLower() == firstAnswer01.ToLower() && inputField02.text.ToLower() == firstAnswer02.ToLower())
         {
             SolveFirstRiddle();
         }
 
-        if (inputField03.text == answer03)
+        if (inputField03.text.ToLower() == secondAnswer01.ToLower() && inputField04.text.ToLower() == secondAnswer02.ToLower())
         {
             SolveSecondRiddle();
         }
 
-        if (!HasFinished)
+        if (!_hasFirstRiddleSolved || !_hasSecondRiddleSolved)
         {
             ClearText();
             trigger.StartCoroutine(trigger.ResetObjState());
@@ -46,10 +68,7 @@ public class ClozeTextUI : MonoBehaviour
         }
         PlayerInventory.Instance.PlayerGetsCatsEye();
         _hasFirstRiddleSolved = true;
-        if (_hasSecondRiddleSolved)
-        {
-            HasFinished = true;
-        }
+        ShowSecondRiddle();
     }
 
     private void SolveSecondRiddle()
@@ -60,10 +79,6 @@ public class ClozeTextUI : MonoBehaviour
         }
         PlayerInventory.Instance.PlayerGetsFish();
         _hasSecondRiddleSolved = true;
-        if (_hasFirstRiddleSolved)
-        {
-            HasFinished = true;
-        }
     }
 
     public void ClearText()
@@ -77,6 +92,13 @@ public class ClozeTextUI : MonoBehaviour
         if (!_hasSecondRiddleSolved)
         {
             inputField03.text = null;
+            inputField04.text = null;
         }
+    }
+
+    public void ShowSecondRiddle()
+    {
+        firstRiddle.gameObject.SetActive(false);
+        secondRiddle.gameObject.SetActive(true);
     }
 }

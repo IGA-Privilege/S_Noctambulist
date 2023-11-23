@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: HumanHand
   m_EditorClassIdentifier: 
   name: Human Hand
-  icon: {fileID: 21300000, guid: f49a27e07835af94f82f52f373054a71, type: 3}
+  icon: {fileID: 21300000, guid: 493e5d694d24b5243a0f41bf55bc3e78, type: 3}
